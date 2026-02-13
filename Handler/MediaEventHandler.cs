@@ -1,3 +1,4 @@
+using Windows.Media.Control;
 using WindowsMediaController;
 
 namespace OneSound.Handler;
@@ -27,6 +28,39 @@ class MediaEventHandler
         {
             Console.WriteLine($"{aumid} is no longer active");
         }
+    }
+
+    public static void OnPlaybackStateChanged(MediaManager.MediaSession session, GlobalSystemMediaTransportControlsSessionPlaybackInfo playbackInfo)
+    {
+        if (playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Opened
+            || playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed)
+        return;
+
+        WriteLineColor($"--Playback status of {session.Id} is now {playbackInfo.PlaybackStatus}", ConsoleColor.Yellow);
+        
+        if (playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused)
+        {
+            // TODO: Play last non-forced paused media (check if it still exists)
+            return;
+        }
+
+        foreach (var activeApp in RegisteredApp.GetActiveSessions())
+        {
+            var appPlaybackStatus = activeApp.ControlSession.GetPlaybackInfo().PlaybackStatus;
+            if (activeApp.Id != session.Id)
+            {
+                WriteLineColor($"Pausing {activeApp.Id}...", ConsoleColor.White);
+                Task.Run(() => TryPauseSessionAsync(activeApp));
+            } 
+        }
+    }
+
+    private static async Task TryPauseSessionAsync(MediaManager.MediaSession session)
+    {
+        var controlSession = session.ControlSession;
+        bool isPaused = await controlSession.TryPauseAsync();
+        
+        WriteLineColor(isPaused == true ? $"{session.Id} has been paused successfully" : $"{session.Id} failed to pause", ConsoleColor.Magenta);
     }
 
     private static void WriteLineColor(object toprint, ConsoleColor color = ConsoleColor.White)
