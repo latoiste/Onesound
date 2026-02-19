@@ -1,6 +1,6 @@
 ﻿using WindowsMediaController;
-using OneSound.Handler;
 using OneSound.Utils;
+using OneSound.Services;
 
 namespace OneSound;
 
@@ -46,23 +46,14 @@ public class SessionManager
 
 public class Program
 {
-    public static void Main()
+    public static void Main(string[] args)
     {
-        // Maybe later add a method that launches on start to populate registeredAumids before initializing MediaManager
-        RegisteredApp.Register("SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify");
-        RegisteredApp.Register("Chrome");
+        var builder = WebApplication.CreateBuilder(args);
 
-        var mediaManager = new MediaManager();
+        builder.Services.AddHostedService<MediaManagerService>();
 
-        mediaManager.OnAnySessionOpened += MediaEventHandler.OnSessionOpened;
-        mediaManager.OnAnySessionClosed += MediaEventHandler.OnSessionClosed;
-        mediaManager.OnAnyPlaybackStateChanged += MediaEventHandler.OnPlaybackStateChanged;
+        var app = builder.Build();
 
-        mediaManager.Start();
-
-        Console.ReadLine();
-        Console.ResetColor();
-        
-        mediaManager.Dispose();
+        app.Run();
     }
 }
