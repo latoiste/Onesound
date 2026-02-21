@@ -3,8 +3,11 @@ namespace OneSound.Utils;
 public class LastMediaTimer
 {
     private static CancellationTokenSource? cts;
+    
+    public delegate void TimeoutDelegate();
+    public event TimeoutDelegate? OnTimerTimeout;
 
-    public static void UpdateLastMediaTimer()
+    public void UpdateLastMediaTimer()
     {
         cts?.Cancel();
         cts?.Dispose();
@@ -13,14 +16,13 @@ public class LastMediaTimer
         var _ =  StartTimerAsync(cts.Token);
     }
 
-    private static async Task StartTimerAsync(CancellationToken token)
+    private async Task StartTimerAsync(CancellationToken token)
     {
         try
         {
-            await Task.Delay(TimeSpan.FromMinutes(3), token);
-            Console.WriteLine($"Last playing session is no longer {SessionManager.LastPlayingSessionId}");
-            SessionManager.LastPlayingSessionId = "";
-        } 
+            await Task.Delay(TimeSpan.FromSeconds(3), token);
+            OnTimerTimeout?.Invoke();
+        }
         catch (OperationCanceledException)
         {
             Console.WriteLine("Token was cancelled");

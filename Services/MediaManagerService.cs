@@ -1,6 +1,5 @@
 
 using OneSound.Handler;
-using OneSound.Utils;
 using WindowsMediaController;
 
 namespace OneSound.Services;
@@ -8,19 +7,19 @@ namespace OneSound.Services;
 public class MediaManagerService : IHostedService
 {
     private readonly MediaManager mediaManager;
+    private readonly MediaEventHandler eventHandler;
     
-    public MediaManagerService()
+    public MediaManagerService(MediaManager mediaManager, MediaEventHandler eventHandler)
     {
-        RegisteredApp.Register("SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify");
-        RegisteredApp.Register("Chrome");
-        mediaManager = new();
+        this.mediaManager = mediaManager;
+        this.eventHandler = eventHandler;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        mediaManager.OnAnySessionOpened += MediaEventHandler.OnSessionOpened;
-        mediaManager.OnAnySessionClosed += MediaEventHandler.OnSessionClosed;
-        mediaManager.OnAnyPlaybackStateChanged += MediaEventHandler.OnPlaybackStateChanged;
+        mediaManager.OnAnySessionOpened += eventHandler.OnSessionOpened;
+        mediaManager.OnAnySessionClosed += eventHandler.OnSessionClosed;
+        mediaManager.OnAnyPlaybackStateChanged += eventHandler.OnPlaybackStateChanged;
 
         mediaManager.Start();
 
@@ -29,7 +28,10 @@ public class MediaManagerService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        mediaManager.Dispose();
+        // no need to call mediaManager.Dispose() now because
+        // mediaManager is dependency injected and DI container
+        // will dispose it automatically when app shuts down
+        // or else a NullReferenceException is thrown
 
         return Task.CompletedTask;
     }

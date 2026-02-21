@@ -2,20 +2,34 @@ using WindowsMediaController;
 
 namespace OneSound.Utils;
 
-public static class SessionManager
+public class SessionManager
 {
-    private static readonly HashSet<string> registeredAumids = new();
-    private static readonly Dictionary<string, MediaManager.MediaSession> activeRegisteredApps = new(); 
-    public static bool Register(string aumid) => registeredAumids.Add(aumid);
-    public static bool IsRegistered(string aumid) => registeredAumids.Contains(aumid);
-    public static bool RemoveActiveApp(string aumid) => activeRegisteredApps.Remove(aumid);
-    public static void AddActiveApp(string aumid, MediaManager.MediaSession session) => activeRegisteredApps[aumid] = session;
-    public static List<MediaManager.MediaSession> GetActiveRegisteredSessions() => activeRegisteredApps.Values.ToList();
-    public static MediaManager.MediaSession? GetSessionFromId(string aumid)
+    private readonly MediaManager mediaManager;
+    private readonly LastMediaTimer timer;
+
+    public SessionManager(MediaManager mediaManager)
+    {
+        this.mediaManager = mediaManager;
+
+        timer = new();
+        timer.OnTimerTimeout += OnTimerTimeout;
+    }
+
+    private readonly HashSet<string> registeredAumids = new();
+    private readonly Dictionary<string, MediaManager.MediaSession> activeRegisteredApps = new(); 
+
+    public List<string> GetAvailableAumids() => mediaManager.CurrentMediaSessions.Keys.ToList();
+    public bool Register(string aumid) => registeredAumids.Add(aumid);
+    public bool RemoveRegisteredAumid(string aumid) => registeredAumids.Remove(aumid);
+    public bool IsRegistered(string aumid) => registeredAumids.Contains(aumid);
+    public bool RemoveActiveApp(string aumid) => activeRegisteredApps.Remove(aumid);
+    public void AddActiveApp(string aumid, MediaManager.MediaSession session) => activeRegisteredApps[aumid] = session;
+    public List<MediaManager.MediaSession> GetActiveRegisteredSessions() => activeRegisteredApps.Values.ToList();
+    public MediaManager.MediaSession? GetSessionFromId(string aumid)
     {
         try
         {
-            var session = activeRegisteredApps[aumid];
+            var session = mediaManager.CurrentMediaSessions[aumid];
             return session;
         }
         catch (KeyNotFoundException)
@@ -23,11 +37,10 @@ public static class SessionManager
             return null;
         }
     }
-    public static bool RemoveRegisteredAumid(string aumid) => registeredAumids.Remove(aumid);
-    public static List<string> GetAvailableAumids(MediaManager mediaManager) => mediaManager.CurrentMediaSessions.Keys.ToList();
     
-    private static string lastPlayingSessionId = "";
-    public static string LastPlayingSessionId { 
+    private string lastPlayingSessionId = "";
+
+    public string LastPlayingSessionId { 
         get => lastPlayingSessionId;
         set
         {
@@ -35,11 +48,17 @@ public static class SessionManager
             if (value != "")
             {
                 Console.WriteLine($"Last playing session is now {lastPlayingSessionId}");
-                LastMediaTimer.UpdateLastMediaTimer();
+                timer.UpdateLastMediaTimer();
             }
-        } 
+        }
     }
-    public static void TryAutoResumeLastSession()
+
+    private void OnTimerTimeout()
+    {
+        LastPlayingSessionId = "";
+    }
+
+    public void TryAutoResumeLastSession()
     {
         var lastSession = GetSessionFromId(LastPlayingSessionId);
         var controlSession = lastSession?.ControlSession;

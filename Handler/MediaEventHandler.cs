@@ -8,33 +8,38 @@ public class MediaEventHandler
 {
     private static readonly object writeLock = new object();
 
-    public static void OnSessionOpened(MediaManager.MediaSession session)
+    private readonly SessionManager sessionManager;
+
+    public MediaEventHandler(SessionManager sessionManager)
+    {
+        this.sessionManager = sessionManager;
+    }
+
+    public void OnSessionOpened(MediaManager.MediaSession session)
     {
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
 
-        if (SessionManager.IsRegistered(aumid))
+        if (sessionManager.IsRegistered(aumid))
         {
-            SessionManager.AddActiveApp(aumid, session);
+            sessionManager.AddActiveApp(aumid, session);
             Console.WriteLine($"{aumid} is active!!!");
         }
     }
 
-    public static void OnSessionClosed(MediaManager.MediaSession session)
+    public void OnSessionClosed(MediaManager.MediaSession session)
     {
         WriteLineColor("-- Removed Source: " + session.Id, ConsoleColor.Red);
         string aumid = session.Id;
 
-        if (SessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
+        if (sessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
         
-        if (aumid == SessionManager.LastPlayingSessionId) SessionManager.LastPlayingSessionId = "";
+        if (aumid == sessionManager.LastPlayingSessionId) sessionManager.LastPlayingSessionId = "";
     }
 
-    public static void OnPlaybackStateChanged(MediaManager.MediaSession session, GlobalSystemMediaTransportControlsSessionPlaybackInfo playbackInfo)
+    public void OnPlaybackStateChanged(MediaManager.MediaSession session, GlobalSystemMediaTransportControlsSessionPlaybackInfo playbackInfo)
     {
-        if (playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Opened
-            || playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed)
-        return;
+        if (!sessionManager.IsRegistered(session.Id)) return;
 
         WriteLineColor($"--Playback status of {session.Id} is now {playbackInfo.PlaybackStatus}", ConsoleColor.Yellow);
         
@@ -44,31 +49,22 @@ public class MediaEventHandler
                 PauseOtherSessions(session);
                 break;
             case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused:
-                if (SessionManager.LastPlayingSessionId != session.Id) SessionManager.TryAutoResumeLastSession();
+                if (sessionManager.LastPlayingSessionId != session.Id) sessionManager.TryAutoResumeLastSession();
                 break;
         }
     }
 
-    private static void PauseOtherSessions(MediaManager.MediaSession currentSession)
+    private void PauseOtherSessions(MediaManager.MediaSession currentSession)
     {
-        foreach (var activeApp in SessionManager.GetActiveRegisteredSessions())
+        foreach (var activeApp in sessionManager.GetActiveRegisteredSessions())
         {
             if (activeApp.Id != currentSession.Id && activeApp.ControlSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
             {
-                WriteLineColor($"Pausing {activeApp.Id}...", ConsoleColor.White);
-                var _ = TryPauseSessionAsync(activeApp);
+                var _ = activeApp.ControlSession.TryPauseAsync();
 
-                SessionManager.LastPlayingSessionId = activeApp.Id;
+                sessionManager.LastPlayingSessionId = activeApp.Id;
             } 
         }
-    }
-
-    private static async Task TryPauseSessionAsync(MediaManager.MediaSession session)
-    {
-        var controlSession = session.ControlSession;
-        bool isPaused = await controlSession.TryPauseAsync();
-        
-        WriteLineColor(isPaused == true ? $"{session.Id} has been paused successfully" : $"{session.Id} failed to pause", ConsoleColor.Magenta);
     }
 
     private static void WriteLineColor(object toprint, ConsoleColor color = ConsoleColor.White)
