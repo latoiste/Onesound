@@ -13,9 +13,9 @@ public class MediaEventHandler
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
 
-        if (RegisteredApp.IsRegistered(aumid))
+        if (SessionManager.IsRegistered(aumid))
         {
-            RegisteredApp.AddActiveApp(aumid, session);
+            SessionManager.AddActiveApp(aumid, session);
             Console.WriteLine($"{aumid} is active!!!");
         }
     }
@@ -25,7 +25,7 @@ public class MediaEventHandler
         WriteLineColor("-- Removed Source: " + session.Id, ConsoleColor.Red);
         string aumid = session.Id;
 
-        if (RegisteredApp.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
+        if (SessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
         
         if (aumid == SessionManager.LastPlayingSessionId) SessionManager.LastPlayingSessionId = "";
     }
@@ -44,19 +44,14 @@ public class MediaEventHandler
                 PauseOtherSessions(session);
                 break;
             case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused:
-                if (SessionManager.LastPlayingSessionId != session.Id)
-                {
-                    var lastSession = RegisteredApp.GetSessionFromId(SessionManager.LastPlayingSessionId);
-                    var controlSession = lastSession?.ControlSession;
-                    _ = controlSession?.TryPlayAsync();   
-                }
+                if (SessionManager.LastPlayingSessionId != session.Id) SessionManager.TryAutoResumeLastSession();
                 break;
         }
     }
 
     private static void PauseOtherSessions(MediaManager.MediaSession currentSession)
     {
-        foreach (var activeApp in RegisteredApp.GetActiveSessions())
+        foreach (var activeApp in SessionManager.GetActiveRegisteredSessions())
         {
             if (activeApp.Id != currentSession.Id && activeApp.ControlSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
             {
