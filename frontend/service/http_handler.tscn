@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://buxe8orf4mu14"]
+
+[ext_resource type="Script" uid="uid://bl28461py1xki" path="res://service/http_handler.gd" id="1_n16re"]
+[ext_resource type="Script" uid="uid://csdobikhq2exf" path="res://addons/Godot-AwaitableHTTPRequest-2.2.1/addons/awaitable_http_request/awaitable_http_request.gd" id="2_0u8kf"]
+
+[node name="HttpHandler" type="Node" unique_id=406380957]
+script = ExtResource("1_n16re")
+
+[node name="AwaitableHTTPRequest" type="HTTPRequest" parent="." unique_id=833353537]
+script = ExtResource("2_0u8kf")
+metadata/_custom_type_script = "uid://csdobikhq2exf"

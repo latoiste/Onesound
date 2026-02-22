@@ -11,8 +11,14 @@ config_version=5
 [application]
 
 config/name="OneSound Frontend"
+run/main_scene="uid://byan8sn7espua"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=400
+window/size/viewport_height=500
 
 [editor_plugins]
 
