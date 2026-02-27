@@ -20,10 +20,14 @@ public class MediaEventHandler
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
 
-        if (sessionManager.IsRegistered(aumid))
+        if (!sessionManager.IsRegistered(aumid)) return;
+        
+        sessionManager.AddActiveApp(aumid, session);
+        Console.WriteLine($"{aumid} is active!!!");
+
+        if (session.ControlSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
         {
-            sessionManager.AddActiveApp(aumid, session);
-            Console.WriteLine($"{aumid} is active!!!");
+            PauseOtherSessions(session);
         }
     }
 
@@ -34,7 +38,12 @@ public class MediaEventHandler
 
         if (sessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
         
-        if (aumid == sessionManager.LastPlayingSessionId) sessionManager.LastPlayingSessionId = "";
+        if (aumid == sessionManager.LastPlayingSessionId) {
+            sessionManager.LastPlayingSessionId = "";
+        } else
+        {
+            sessionManager.TryAutoResumeLastSession();
+        }
     }
 
     public void OnPlaybackStateChanged(MediaManager.MediaSession session, GlobalSystemMediaTransportControlsSessionPlaybackInfo playbackInfo)

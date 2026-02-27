@@ -20,7 +20,7 @@ public class LastMediaTimer
     {
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), token);
+            await Task.Delay(TimeSpan.FromMinutes(2), token);
             OnTimerTimeout?.Invoke();
         }
         catch (OperationCanceledException)

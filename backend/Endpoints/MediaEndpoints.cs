@@ -6,10 +6,18 @@ public static class MediaEndpoints
 {
     public static void MapMediaApi(this RouteGroupBuilder group)
     {
-        group.MapGet("/", (SessionManager sessionManager) => {
+        group.MapGet("/", async (SessionManager sessionManager) => {
             List<string> availableAumids = sessionManager.GetAvailableAumids();  
+            //hmm maybe add a cache so building response isnt that heavy
+            List<SessionDto> sessionDtos = new();
 
-            return Results.Ok(availableAumids);   
+            foreach (var aumid in availableAumids)
+            {
+                var dto = await DtoHelper.GetFromAumid(aumid);
+                sessionDtos.Add(dto);
+            }
+
+            return Results.Ok(sessionDtos);   
         });
 
         group.MapPost("/{aumid}", (string aumid, SessionManager sessionManager) =>
