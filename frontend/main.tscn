@@ -2,8 +2,74 @@
 
 [ext_resource type="Script" uid="uid://dpi0qaydp572b" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://buxe8orf4mu14" path="res://service/http_handler.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://bg82jr46rnvje" path="res://components/media_list/media_list.tscn" id="3_h2yge"]
 
-[node name="Main" type="Node2D" unique_id=1003464614]
+[node name="Main" type="Control" unique_id=147359178]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
 script = ExtResource("1_ig7tw")
 
 [node name="HttpHandler" parent="." unique_id=406380957 instance=ExtResource("2_0xm2m")]
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2064820297]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VSplitContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1030150516]
+layout_mode = 2
+
+[node name="VSplitContainer" type="VSplitContainer" parent="MarginContainer/VSplitContainer" unique_id=776949149]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AvailableApps" type="VSplitContainer" parent="MarginContainer/VSplitContainer/VSplitContainer" unique_id=1912384490]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+dragging_enabled = false
+
+[node name="Label" type="Label" parent="MarginContainer/VSplitContainer/VSplitContainer/AvailableApps" unique_id=129593572]
+layout_mode = 2
+text = "Available Apps:"
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VSplitContainer/VSplitContainer/AvailableApps" unique_id=825897462]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+
+[node name="AvailableMediaList" parent="MarginContainer/VSplitContainer/VSplitContainer/AvailableApps/PanelContainer" unique_id=876891296 instance=ExtResource("3_h2yge")]
+unique_name_in_owner = true
+layout_mode = 2
+type = 0
+
+[node name="RegisteredApps" type="VSplitContainer" parent="MarginContainer/VSplitContainer/VSplitContainer" unique_id=1524052058]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+dragging_enabled = false
+
+[node name="Label" type="Label" parent="MarginContainer/VSplitContainer/VSplitContainer/RegisteredApps" unique_id=1223835097]
+layout_mode = 2
+text = "Registered Apps:"
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VSplitContainer/VSplitContainer/RegisteredApps" unique_id=38901871]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+
+[node name="RegisteredMediaList" parent="MarginContainer/VSplitContainer/VSplitContainer/RegisteredApps/PanelContainer" unique_id=591440089 instance=ExtResource("3_h2yge")]
+unique_name_in_owner = true
+layout_mode = 2
+type = 1
+
+[node name="RequestTimer" type="Timer" parent="." unique_id=793264103]
+wait_time = 3.0

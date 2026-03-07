@@ -7,5 +7,6 @@
 script = ExtResource("1_n16re")
 
 [node name="AwaitableHTTPRequest" type="HTTPRequest" parent="." unique_id=833353537]
+timeout = 5.0
 script = ExtResource("2_0u8kf")
 metadata/_custom_type_script = "uid://csdobikhq2exf"
