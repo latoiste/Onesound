@@ -1,3 +1,4 @@
+using OneSound.Saves;
 using WindowsMediaController;
 
 namespace OneSound.Utils;
@@ -6,6 +7,7 @@ public class SessionManager
 {
     private readonly MediaManager mediaManager;
     private readonly LastMediaTimer timer;
+    private readonly Settings settings;
 
     public SessionManager(MediaManager mediaManager)
     {
@@ -13,14 +15,23 @@ public class SessionManager
 
         timer = new();
         timer.OnTimerTimeout += OnTimerTimeout;
+
+        settings = new();
     }
 
     private readonly HashSet<string> registeredAumids = new();
     private readonly Dictionary<string, MediaManager.MediaSession> activeRegisteredApps = new(); 
 
+    public List<string> GetRegisteredAumids() => registeredAumids.ToList();
     public List<string> GetAvailableAumids() => mediaManager.CurrentMediaSessions.Keys.ToList();
-    public bool Register(string aumid) => registeredAumids.Add(aumid);
-    public bool RemoveRegisteredAumid(string aumid) => registeredAumids.Remove(aumid);
+    public bool Register(string aumid) {
+        settings.AddRegisteredAumid(aumid);
+        return registeredAumids.Add(aumid);
+    }
+    public bool RemoveRegisteredAumid(string aumid) {
+        settings.RemoveRegisteredAumid(aumid);
+        return registeredAumids.Remove(aumid);
+    }
     public bool IsRegistered(string aumid) => registeredAumids.Contains(aumid);
     public bool RemoveActiveApp(string aumid) => activeRegisteredApps.Remove(aumid);
     public void AddActiveApp(string aumid, MediaManager.MediaSession session) => activeRegisteredApps[aumid] = session;
