@@ -17,6 +17,11 @@ public class SessionManager
         timer.OnTimerTimeout += OnTimerTimeout;
 
         settings = new();
+
+        foreach (var aumid in settings.ReadRegisteredAumid())
+        {
+            registeredAumids.Add(aumid);
+        }
     }
 
     private readonly HashSet<string> registeredAumids = new();

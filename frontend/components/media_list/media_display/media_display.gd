@@ -11,6 +11,7 @@ var type: Session.Type
 
 const ADD_ICON: Texture2D = preload("uid://r42eypsp34ua")
 const REMOVE_ICON: Texture2D = preload("uid://bff8ca0srkf1i")
+const DEFAULT_ICON: Texture2D = preload("uid://daldc0d5vuqui")
 const MEDIA_DISPLAY_SCENE: PackedScene = preload("uid://bgipxrwuktnps")
 const HEIGHT_RATIO := 0.15
 
@@ -26,9 +27,10 @@ func _ready() -> void:
 	var viewport_height = get_viewport().size.y
 	custom_minimum_size.y = viewport_height * HEIGHT_RATIO
 	
-	#TODO: add a default icon_texture
 	if icon_texture != null:
 		app_icon.texture = icon_texture
+	else:
+		app_icon.texture = DEFAULT_ICON
 	aumid_label.text = aumid
 	
 	button.icon = ADD_ICON if type == Session.Type.AVAILABLE else REMOVE_ICON

@@ -51,7 +51,6 @@ layout_mode = 2
 [node name="AvailableMediaList" parent="MarginContainer/VSplitContainer/VSplitContainer/AvailableApps/PanelContainer" unique_id=876891296 instance=ExtResource("3_h2yge")]
 unique_name_in_owner = true
 layout_mode = 2
-type = 0
 
 [node name="RegisteredApps" type="VSplitContainer" parent="MarginContainer/VSplitContainer/VSplitContainer" unique_id=1524052058]
 custom_minimum_size = Vector2(0, 150)

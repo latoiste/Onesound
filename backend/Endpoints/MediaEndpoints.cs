@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using OneSound.Utils;
 
 namespace OneSound.Endpoints;
@@ -6,15 +7,15 @@ public static class MediaEndpoints
 {
     public static void MapMediaApi(this RouteGroupBuilder group)
     {
-        group.MapGet("/", async (SessionManager sessionManager) => {
-            List<string> availableAumids = sessionManager.GetAvailableAumids();  
-            //hmm maybe add a cache so building response isnt that heavy
+        group.MapGet("/", async (SessionManager sessionManager, [FromQuery] bool registered = false) => {
+            List<string> aumids = registered ? sessionManager.GetRegisteredAumids() : sessionManager.GetAvailableAumids();
             List<SessionDto> sessionDtos = new();
 
-            foreach (var aumid in availableAumids)
+            foreach (var aumid in aumids)
             {
                 var dto = await DtoHelper.GetFromAumid(aumid);
-                sessionDtos.Add(dto);
+                
+                if (dto != null) sessionDtos.Add(dto);
             }
 
             return Results.Ok(sessionDtos);   

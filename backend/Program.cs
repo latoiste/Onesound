@@ -22,6 +22,7 @@ public class Program
 
         app.MapGroup("/media")
             .MapMediaApi();
+        app.MapGet("/health", () => Results.Ok());
         app.Run();
     }
 }

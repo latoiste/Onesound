@@ -4,13 +4,16 @@ namespace OneSound.Saves;
 
 public class Settings
 {
-    private readonly string filePath = @"user_settings.json";
+    private readonly string filePath;
     private readonly JsonSerializerOptions options = new();
     private readonly RootSettings rootSettings;
 
     public Settings()
     {
+        filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user_settings.json");
+        
         options.WriteIndented = true;
+        
         rootSettings = GetDeserializedJson();
     }
 
@@ -27,6 +30,8 @@ public class Settings
         
         File.WriteAllText(filePath, JsonSerializer.Serialize(rootSettings, options));
     }
+
+    public List<string> ReadRegisteredAumid() => rootSettings.RegisteredAumids;
 
     private RootSettings GetDeserializedJson()
     {

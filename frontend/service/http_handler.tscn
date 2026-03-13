@@ -10,3 +10,5 @@ script = ExtResource("1_n16re")
 timeout = 5.0
 script = ExtResource("2_0u8kf")
 metadata/_custom_type_script = "uid://csdobikhq2exf"
+
+[node name="HealthTimer" type="Timer" parent="." unique_id=712781260]
