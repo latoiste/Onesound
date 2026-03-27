@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using OneSound.Utils;
+using OneSound.DTO;
+using OneSound.Media.Session;
 
 namespace OneSound.Endpoints;
 

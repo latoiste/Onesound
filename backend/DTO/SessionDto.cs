@@ -5,7 +5,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.Storage.Streams;
 
-namespace OneSound.Utils;
+namespace OneSound.DTO;
 
 public record class SessionDto(string Aumid, string DisplayName, string Base64EncodedIcon);
 

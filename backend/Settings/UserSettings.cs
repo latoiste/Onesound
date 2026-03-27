@@ -1,14 +1,14 @@
 using System.Text.Json;
 
-namespace OneSound.Saves;
+namespace OneSound.Settings;
 
-public class Settings
+public class UserSettings
 {
     private readonly string filePath;
     private readonly JsonSerializerOptions options = new();
     private readonly RootSettings rootSettings;
 
-    public Settings()
+    public UserSettings()
     {
         filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "user_settings.json");
         

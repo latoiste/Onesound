@@ -1,13 +1,13 @@
-using OneSound.Saves;
+using OneSound.Settings;
 using WindowsMediaController;
 
-namespace OneSound.Utils;
+namespace OneSound.Media.Session;
 
 public class SessionManager
 {
     private readonly MediaManager mediaManager;
     private readonly LastMediaTimer timer;
-    private readonly Settings settings;
+    private readonly UserSettings settings;
 
     public SessionManager(MediaManager mediaManager)
     {

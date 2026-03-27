@@ -1,7 +1,7 @@
 ﻿using OneSound.Endpoints;
-using OneSound.Handler;
+using OneSound.Media.Handler;
 using OneSound.Services;
-using OneSound.Utils;
+using OneSound.Media.Session;
 using WindowsMediaController;
 
 namespace OneSound;

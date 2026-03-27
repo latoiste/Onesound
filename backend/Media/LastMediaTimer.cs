@@ -1,4 +1,4 @@
-namespace OneSound.Utils;
+namespace OneSound.Media;
 
 public class LastMediaTimer
 {

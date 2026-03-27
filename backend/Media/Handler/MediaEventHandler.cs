@@ -1,4 +1,4 @@
-using OneSound.Utils;
+using OneSound.Media.Session;
 using Windows.Media.Control;
 using WindowsMediaController;
 
