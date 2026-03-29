@@ -1,6 +1,6 @@
 
-using OneSound.Handler;
-using WindowsMediaController;
+using OneSound.Media.Handler;
+using OneSound.Media.Manager;
 
 namespace OneSound.Services;
 
@@ -17,9 +17,9 @@ public class MediaManagerService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        mediaManager.OnAnySessionOpened += eventHandler.OnSessionOpened;
-        mediaManager.OnAnySessionClosed += eventHandler.OnSessionClosed;
-        mediaManager.OnAnyPlaybackStateChanged += eventHandler.OnPlaybackStateChanged;
+        mediaManager.OnSessionOpened += eventHandler.OnSessionOpened;
+        mediaManager.OnSessionClosed += eventHandler.OnSessionClosed;
+        mediaManager.OnPlaybackStateChanged += eventHandler.OnPlaybackStateChanged;
 
         mediaManager.Start();
 

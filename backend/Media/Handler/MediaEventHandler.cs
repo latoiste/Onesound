@@ -1,44 +1,50 @@
 using OneSound.Media.Session;
-using Windows.Media.Control;
-using WindowsMediaController;
+using OneSound.Media.Manager;
 
-namespace OneSound.Handler;
+namespace OneSound.Media.Handler;
 
 public class MediaEventHandler
 {
     private static readonly object writeLock = new object();
 
     private readonly SessionManager sessionManager;
+    private readonly MediaManager mediaManager;
 
-    public MediaEventHandler(SessionManager sessionManager)
+    public MediaEventHandler(SessionManager sessionManager, MediaManager mediaManager)
     {
         this.sessionManager = sessionManager;
+        this.mediaManager = mediaManager;
     }
 
-    public void OnSessionOpened(MediaManager.MediaSession session)
+    public void OnSessionOpened(MediaSession session)
     {
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
+        
+        mediaManager.AddCurrentMediaSession(aumid, session);
 
         if (!sessionManager.IsRegistered(aumid)) return;
         
         sessionManager.AddActiveApp(aumid, session);
         Console.WriteLine($"{aumid} is active!!!");
 
-        if (session.ControlSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+        if (session.GetPlaybackStatus() == SessionStatus.Playing)
         {
             PauseOtherSessions(session);
         }
     }
 
-    public void OnSessionClosed(MediaManager.MediaSession session)
+    public void OnSessionClosed(MediaSession session)
     {
         WriteLineColor("-- Removed Source: " + session.Id, ConsoleColor.Red);
         string aumid = session.Id;
 
+        mediaManager.RemoveCurrentMediaSession(aumid);
+
         if (sessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
         
-        if (aumid == sessionManager.LastPlayingSessionId) {
+        if (aumid == sessionManager.LastPlayingSessionId) 
+        {
             sessionManager.LastPlayingSessionId = "";
         } else
         {
@@ -46,30 +52,30 @@ public class MediaEventHandler
         }
     }
 
-    public void OnPlaybackStateChanged(MediaManager.MediaSession session, GlobalSystemMediaTransportControlsSessionPlaybackInfo playbackInfo)
+    public void OnPlaybackStateChanged(MediaSession session, SessionStatus status)
     {
         if (!sessionManager.IsRegistered(session.Id)) return;
 
-        WriteLineColor($"--Playback status of {session.Id} is now {playbackInfo.PlaybackStatus}", ConsoleColor.Yellow);
+        WriteLineColor($"--Playback status of {session.Id} is now {status}", ConsoleColor.Yellow);
         
-        switch (playbackInfo.PlaybackStatus)
+        switch (status)
         {
-            case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing:
+            case SessionStatus.Playing:
                 PauseOtherSessions(session);
                 break;
-            case GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused:
+            case SessionStatus.Paused:
                 if (sessionManager.LastPlayingSessionId != session.Id) sessionManager.TryAutoResumeLastSession();
                 break;
         }
     }
 
-    private void PauseOtherSessions(MediaManager.MediaSession currentSession)
+    private void PauseOtherSessions(MediaSession currentSession)
     {
         foreach (var activeApp in sessionManager.GetActiveRegisteredSessions())
         {
-            if (activeApp.Id != currentSession.Id && activeApp.ControlSession.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+            if (activeApp.Id != currentSession.Id && activeApp.GetPlaybackStatus() == SessionStatus.Playing)
             {
-                var _ = activeApp.ControlSession.TryPauseAsync();
+                var _ = activeApp.PauseAsync();
 
                 sessionManager.LastPlayingSessionId = activeApp.Id;
             } 

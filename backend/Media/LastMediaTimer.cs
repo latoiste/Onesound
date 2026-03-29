@@ -4,8 +4,7 @@ public class LastMediaTimer
 {
     private static CancellationTokenSource? cts;
     
-    public delegate void TimeoutDelegate();
-    public event TimeoutDelegate? OnTimerTimeout;
+    public event Action OnTimerTimeout;
 
     public void UpdateLastMediaTimer()
     {
