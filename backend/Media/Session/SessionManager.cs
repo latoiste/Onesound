@@ -65,7 +65,7 @@ public class SessionManager : IDisposable
     public void TryAutoResumeLastSession()
     {
         var lastSession = mediaManager.GetSessionFromId(LastPlayingSessionId);
-        _ = lastSession?.PlayAsync();   
+        lastSession?.PlayAsync();   
     }
     
     private void OnTimerTimeout()

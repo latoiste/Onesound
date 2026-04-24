@@ -14,18 +14,18 @@ public class MediaEventHandler
         this.sessionManager = sessionManager;
     }
 
-    public void OnSessionOpened(MediaSession session)
+    public async Task OnSessionOpened(MediaSession session)
     {
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
 
         if (!sessionManager.IsRegistered(aumid)) return;
         
-        Console.WriteLine($"{aumid} is active!!!");
+        SessionStatus playbackStatus = await session.GetPlaybackStatusAsync();
 
-        if (session.GetPlaybackStatus() == SessionStatus.Playing)
+        if (playbackStatus == SessionStatus.Playing) // uhhh
         {
-            PauseOtherSessions(session);
+            _ = PauseOtherSessions(session);
         }
     }
 
@@ -34,8 +34,6 @@ public class MediaEventHandler
         WriteLineColor("-- Removed Source: " + session.Id, ConsoleColor.Red);
         string aumid = session.Id;
 
-        Console.WriteLine($"{aumid} is no longer active");
-        
         if (aumid == sessionManager.LastPlayingSessionId) 
         {
             sessionManager.LastPlayingSessionId = "";
@@ -54,7 +52,7 @@ public class MediaEventHandler
         switch (status)
         {
             case SessionStatus.Playing:
-                PauseOtherSessions(session);
+                _ = PauseOtherSessions(session);
                 break;
             case SessionStatus.Paused:
                 if (sessionManager.LastPlayingSessionId != session.Id) sessionManager.TryAutoResumeLastSession();
@@ -62,13 +60,15 @@ public class MediaEventHandler
         }
     }
 
-    private void PauseOtherSessions(MediaSession currentSession)
+    private async Task PauseOtherSessions(MediaSession currentSession)
     {
         foreach (var activeApp in sessionManager.GetActiveRegisteredSessions())
         {
-            if (activeApp.Id != currentSession.Id && activeApp.GetPlaybackStatus() == SessionStatus.Playing)
+            SessionStatus playbackStatus = await activeApp.GetPlaybackStatusAsync();
+
+            if (activeApp.Id != currentSession.Id && playbackStatus == SessionStatus.Playing)
             {
-                activeApp.PauseAsync();
+                _ = activeApp.PauseAsync();
 
                 sessionManager.LastPlayingSessionId = activeApp.Id;
             } 

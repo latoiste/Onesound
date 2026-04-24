@@ -53,10 +53,10 @@ public class MediaSessionWindows : MediaSession
         this.controlSession = controlSession;
     }
 
-    public override SessionStatus GetPlaybackStatus()
+    public override Task<SessionStatus> GetPlaybackStatusAsync()
     {
-        GlobalSystemMediaTransportControlsSessionPlaybackStatus playbackInfo = controlSession.GetPlaybackInfo().PlaybackStatus;
-        return playbackInfo.ToSessionStatus();
+        GlobalSystemMediaTransportControlsSessionPlaybackStatus playbackStatus = controlSession.GetPlaybackInfo().PlaybackStatus;
+        return Task.FromResult(playbackStatus.ToSessionStatus());
     }
 
     public override async Task PauseAsync() => await controlSession.TryPauseAsync();

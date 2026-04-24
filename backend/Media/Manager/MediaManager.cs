@@ -63,7 +63,7 @@ public abstract class MediaSession
         Id = id;
     }
 
-    public abstract SessionStatus GetPlaybackStatus();
+    public abstract Task<SessionStatus> GetPlaybackStatusAsync();
     public abstract Task PlayAsync();
     public abstract Task PauseAsync();
 }

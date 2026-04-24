@@ -209,27 +209,35 @@ public class MediaSessionLinux : MediaSession
 {
     private readonly DBusConnection connection;
 
-    // make id here the service path
     public MediaSessionLinux(string id, DBusConnection connection) : base(id)
     {
         this.connection = connection;
     }
 
-    public override SessionStatus GetPlaybackStatus()
+    public override async Task<SessionStatus> GetPlaybackStatusAsync()
     {
-        // TODO: get status ahdjadh
+        string status = await connection.CallMethodAsync<string>(
+            message: CreateGetPropertyMessage("PlaybackStatus"),
+            reader: static (message, _) =>
+            {
+                Reader reader = message.GetBodyReader();
 
-        return SessionStatus.Playing;
+                string status = reader.ReadVariantValue().ToString();
+                return status;                
+            }
+        );
+        Console.WriteLine(status.ToSessionStatus());
+        return status.ToSessionStatus();
     }
 
     public override async Task PauseAsync()
     {
-        await connection.CallMethodAsync(createMediaPlayerMessage("Pause"));
+        await connection.CallMethodAsync(CreateMediaPlayerMessage("Pause"));
     }
 
     public override async Task PlayAsync()
     {
-        await connection.CallMethodAsync(createMediaPlayerMessage("Play"));
+        await connection.CallMethodAsync(CreateMediaPlayerMessage("Play"));
     }
 
     // dbus-send --session 
@@ -237,7 +245,7 @@ public class MediaSessionLinux : MediaSession
     // --dest=org.mpris.MediaPlayer2.spotify 
     // path /org/mpris/MediaPlayer2 
     // method org.mpris.MediaPlayer2.Player.Play
-    private MessageBuffer createMediaPlayerMessage(string member)
+    private MessageBuffer CreateMediaPlayerMessage(string member)
     {
         using var writer = connection.GetMessageWriter();
 
@@ -255,5 +263,23 @@ public class MediaSessionLinux : MediaSession
     // --type=method_call 
     // --dest=org.mpris.MediaPlayer2.spotify 
     // path /org/mpris/MediaPlayer2 
-    // method org.freedesktop.DBus.Properties
+    // method org.freedesktop.DBus.Properties.Get
+    // string:org.mpris.MediaPlayer2.Player string:PlaybackStatus
+    private MessageBuffer CreateGetPropertyMessage(string property)
+    {
+        using var writer = connection.GetMessageWriter();
+
+        writer.WriteMethodCallHeader(
+            destination: Id,
+            path: "/org/mpris/MediaPlayer2",
+            @interface: "org.freedesktop.DBus.Properties",
+            member: "Get",
+            signature: "ss"
+        );
+
+        writer.WriteString("org.mpris.MediaPlayer2.Player");
+        writer.WriteString(property);
+
+        return writer.CreateMessage();
+    }
 }

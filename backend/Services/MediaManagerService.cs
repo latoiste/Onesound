@@ -17,7 +17,7 @@ public class MediaManagerService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        mediaManager.OnSessionOpened += eventHandler.OnSessionOpened;
+        mediaManager.OnSessionOpened += async(session) => await eventHandler.OnSessionOpened(session);
         mediaManager.OnSessionClosed += eventHandler.OnSessionClosed;
         mediaManager.OnPlaybackStateChanged += eventHandler.OnPlaybackStateChanged;
 
