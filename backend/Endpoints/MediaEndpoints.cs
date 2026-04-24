@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OneSound.DTO;
+using OneSound.Media.Manager;
 using OneSound.Media.Session;
 
 namespace OneSound.Endpoints;
@@ -22,11 +23,11 @@ public static class MediaEndpoints
             return Results.Ok(sessionDtos);   
         });
 
-        group.MapPost("/{aumid}", (string aumid, SessionManager sessionManager) =>
+        group.MapPost("/{aumid}", (string aumid, SessionManager sessionManager, MediaManager mediaManager) =>
         {
             Console.WriteLine("hellow");
             if (sessionManager.Register(aumid)) {
-                var session = sessionManager.GetSessionFromId(aumid);
+                var session = mediaManager.GetSessionFromId(aumid);
                 if (session != null)
                 {
                     sessionManager.AddActiveApp(aumid, session);

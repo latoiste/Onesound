@@ -15,15 +15,13 @@ public class MediaManagerService : IHostedService
         this.eventHandler = eventHandler;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         mediaManager.OnSessionOpened += eventHandler.OnSessionOpened;
         mediaManager.OnSessionClosed += eventHandler.OnSessionClosed;
         mediaManager.OnPlaybackStateChanged += eventHandler.OnPlaybackStateChanged;
 
-        mediaManager.Start();
-
-        return Task.CompletedTask;
+        await mediaManager.StartAsync();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

@@ -29,4 +29,23 @@ public static class SessionStatusHelper
         }
         return status;
     }
+
+    public static SessionStatus ToSessionStatus(this string linuxStatus)
+    {
+        SessionStatus status;
+
+        switch (linuxStatus)
+        {
+            case "Playing [String]":
+                status = SessionStatus.Playing;
+                break;
+            case "Paused [String]":
+                status = SessionStatus.Paused;
+                break;
+            default:
+                status = SessionStatus.Unknwon;
+                break;
+        }
+        return status;
+    }
 }

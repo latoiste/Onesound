@@ -6,6 +6,7 @@ namespace OneSound.Media.Manager;
 public class MediaManagerWindows : MediaManager
 {
     private WindowsMediaController.MediaManager mediaManager;
+    private bool isStarted = false;
 
     public MediaManagerWindows()
     {
@@ -16,7 +17,17 @@ public class MediaManagerWindows : MediaManager
         mediaManager.OnAnyPlaybackStateChanged += PlaybackStateChangedTranslator;
     }
 
-    public override void Start() => mediaManager.Start();
+    public override async Task StartAsync() {
+        if (isStarted) return;
+
+        await mediaManager.StartAsync();
+        isStarted = true;
+    }
+
+    public override void Dispose()
+    {
+        mediaManager.Dispose();
+    }
 
     private void SessionOpenedTranslator(WindowsMediaController.MediaManager.MediaSession winSession) => NotifySessionOpened(new MediaSessionWindows(winSession.Id, winSession.ControlSession));
 
@@ -35,7 +46,7 @@ public class MediaManagerWindows : MediaManager
 
 public class MediaSessionWindows : MediaSession
 {
-    private GlobalSystemMediaTransportControlsSession controlSession;
+    private readonly GlobalSystemMediaTransportControlsSession controlSession;
 
     public MediaSessionWindows(string id, GlobalSystemMediaTransportControlsSession controlSession) : base(id)
     {

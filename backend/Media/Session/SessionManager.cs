@@ -2,7 +2,7 @@ using OneSound.Settings;
 using OneSound.Media.Manager;
 namespace OneSound.Media.Session;
 
-public class SessionManager
+public class SessionManager : IDisposable
 {
     private readonly MediaManager mediaManager;
     private readonly LastMediaTimer timer;
@@ -23,6 +23,9 @@ public class SessionManager
     {
         this.mediaManager = mediaManager;
 
+        mediaManager.OnSessionOpened += OnSessionOpened;
+        mediaManager.OnSessionClosed += OnSessionClosed;
+
         timer = new();
         timer.OnTimerTimeout += OnTimerTimeout;
 
@@ -39,7 +42,7 @@ public class SessionManager
 
     public List<string> GetRegisteredAumids() => registeredAumids.ToList();
     
-    public List<string> GetAvailableAumids() => mediaManager.CurrentMediaSessions.Keys.ToList();
+    public List<string> GetAvailableAumids() => mediaManager.GetAllIds();
 
     public bool Register(string aumid) {
         settings.AddRegisteredAumid(aumid);
@@ -59,27 +62,23 @@ public class SessionManager
 
     public List<MediaSession> GetActiveRegisteredSessions() => activeRegisteredApps.Values.ToList();
 
-    public MediaSession? GetSessionFromId(string aumid)
-    {
-        try
-        {
-            var session = mediaManager.CurrentMediaSessions[aumid];
-            return session;
-        }
-        catch (KeyNotFoundException)
-        {
-            return null;
-        }
-    }
-
     public void TryAutoResumeLastSession()
     {
-        var lastSession = GetSessionFromId(LastPlayingSessionId);
+        var lastSession = mediaManager.GetSessionFromId(LastPlayingSessionId);
         _ = lastSession?.PlayAsync();   
     }
     
     private void OnTimerTimeout()
     {
         LastPlayingSessionId = "";
+    }
+
+    private void OnSessionOpened(MediaSession session) => AddActiveApp(session.Id, session);
+    private void OnSessionClosed(MediaSession session) => RemoveActiveApp(session.Id);
+
+    public void Dispose()
+    {
+        mediaManager.OnSessionOpened -= OnSessionOpened;
+        mediaManager.OnSessionClosed -= OnSessionClosed;
     }
 }

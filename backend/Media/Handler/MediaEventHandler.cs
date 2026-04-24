@@ -8,24 +8,19 @@ public class MediaEventHandler
     private static readonly object writeLock = new object();
 
     private readonly SessionManager sessionManager;
-    private readonly MediaManager mediaManager;
 
-    public MediaEventHandler(SessionManager sessionManager, MediaManager mediaManager)
+    public MediaEventHandler(SessionManager sessionManager)
     {
         this.sessionManager = sessionManager;
-        this.mediaManager = mediaManager;
     }
 
     public void OnSessionOpened(MediaSession session)
     {
         WriteLineColor("-- New Source: " + session.Id, ConsoleColor.Green);
         string aumid = session.Id;
-        
-        mediaManager.AddCurrentMediaSession(aumid, session);
 
         if (!sessionManager.IsRegistered(aumid)) return;
         
-        sessionManager.AddActiveApp(aumid, session);
         Console.WriteLine($"{aumid} is active!!!");
 
         if (session.GetPlaybackStatus() == SessionStatus.Playing)
@@ -39,9 +34,7 @@ public class MediaEventHandler
         WriteLineColor("-- Removed Source: " + session.Id, ConsoleColor.Red);
         string aumid = session.Id;
 
-        mediaManager.RemoveCurrentMediaSession(aumid);
-
-        if (sessionManager.RemoveActiveApp(aumid)) Console.WriteLine($"{aumid} is no longer active");
+        Console.WriteLine($"{aumid} is no longer active");
         
         if (aumid == sessionManager.LastPlayingSessionId) 
         {
@@ -75,7 +68,7 @@ public class MediaEventHandler
         {
             if (activeApp.Id != currentSession.Id && activeApp.GetPlaybackStatus() == SessionStatus.Playing)
             {
-                var _ = activeApp.PauseAsync();
+                activeApp.PauseAsync();
 
                 sessionManager.LastPlayingSessionId = activeApp.Id;
             } 

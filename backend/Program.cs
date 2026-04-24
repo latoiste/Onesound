@@ -15,7 +15,10 @@ public class Program
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            builder.Services.AddSingleton<MediaManagerWindows>();
+            builder.Services.AddSingleton<MediaManager, MediaManagerWindows>();
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            builder.Services.AddSingleton<MediaManager, MediaManagerLinux>();
         }
 
         builder.Services.AddSingleton<SessionManager>();

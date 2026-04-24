@@ -2,22 +2,56 @@ using OneSound.Media.Session;
 
 namespace OneSound.Media.Manager;
 
-public abstract class MediaManager
+public abstract class MediaManager : IDisposable
 {
-    public readonly Dictionary<string, MediaSession> CurrentMediaSessions = new();
+    private readonly Dictionary<string, MediaSession> CurrentMediaSessions = new();
     
-    public abstract void Start();
+    public MediaManager()
+    {
+        OnSessionOpened += AddCurrentMediaSessions;
+        OnSessionClosed += RemoveCurrentMediaSession;
+    }
 
-    public event Action<MediaSession> OnSessionOpened;
-    public event Action<MediaSession> OnSessionClosed;
-    public event Action<MediaSession, SessionStatus> OnPlaybackStateChanged;
+    public abstract Task StartAsync();
+    public virtual void Dispose()
+    {
+        OnSessionOpened -= AddCurrentMediaSessions;
+        OnSessionClosed -= RemoveCurrentMediaSession;
+    }
 
-    public void AddCurrentMediaSession(string id, MediaSession session) => CurrentMediaSessions[id] = session;
-    public void RemoveCurrentMediaSession(string id) => CurrentMediaSessions.Remove(id);
+    public MediaSession? GetSessionFromId(string aumid)
+    {
+        try
+        {
+            var session = CurrentMediaSessions[aumid];
+            return session;
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    public List<string> GetAllIds() => CurrentMediaSessions.Keys.ToList();
+
+    public event Action<MediaSession>? OnSessionOpened;
+    public event Action<MediaSession>? OnSessionClosed;
+    public event Action<MediaSession, SessionStatus>? OnPlaybackStateChanged;
 
     protected void NotifySessionOpened(MediaSession session) => OnSessionOpened?.Invoke(session);
     protected void NotifySessionClosed(MediaSession session) => OnSessionClosed?.Invoke(session);
     protected void NotifyPlaybackStateChanged(MediaSession session, SessionStatus status) => OnPlaybackStateChanged?.Invoke(session, status);
+    
+    private void AddCurrentMediaSessions(MediaSession session) {
+        string id = session.Id;
+        CurrentMediaSessions[id] = session;
+    }
+    
+    private void RemoveCurrentMediaSession(MediaSession session)
+    {
+        string id = session.Id;
+        CurrentMediaSessions.Remove(id);
+    }
 }
 
 public abstract class MediaSession
