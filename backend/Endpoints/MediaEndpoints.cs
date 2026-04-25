@@ -15,7 +15,7 @@ public static class MediaEndpoints
 
             foreach (var aumid in aumids)
             {
-                var dto = await DtoHelper.GetFromAumid(aumid);
+                SessionDto dto = new(aumid);
                 
                 if (dto != null) sessionDtos.Add(dto);
             }

@@ -1,4 +1,6 @@
+#if WINDOWS
 using Windows.Media.Control;
+#endif
 
 namespace OneSound.Media.Session;
 
@@ -11,6 +13,7 @@ public enum SessionStatus
 
 public static class SessionStatusHelper
 {
+    #if WINDOWS
     public static SessionStatus ToSessionStatus(this GlobalSystemMediaTransportControlsSessionPlaybackStatus winStatus)
     {
         SessionStatus status;
@@ -29,6 +32,7 @@ public static class SessionStatusHelper
         }
         return status;
     }
+    #endif
 
     public static SessionStatus ToSessionStatus(this string linuxStatus)
     {

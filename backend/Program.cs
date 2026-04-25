@@ -2,7 +2,6 @@
 using OneSound.Media.Handler;
 using OneSound.Services;
 using OneSound.Media.Session;
-using System.Runtime.InteropServices;
 using OneSound.Media.Manager;
 
 namespace OneSound;
@@ -13,13 +12,11 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
+        #if WINDOWS
             builder.Services.AddSingleton<MediaManager, MediaManagerWindows>();
-        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
+        #elif LINUX
             builder.Services.AddSingleton<MediaManager, MediaManagerLinux>();
-        }
+        #endif
 
         builder.Services.AddSingleton<SessionManager>();
         builder.Services.AddSingleton<MediaEventHandler>();

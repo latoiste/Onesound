@@ -1,3 +1,4 @@
+#if LINUX
 using System.Threading.Channels;
 using OneSound.Media.Session;
 using Tmds.DBus.Protocol;
@@ -16,8 +17,6 @@ public class MediaManagerLinux : MediaManager
 
     public MediaManagerLinux()
     {
-        if (isStarted) return;
-
         dBusSessionAddress = DBusAddress.Session ?? throw new Exception("Environment variable DBUS_SESSION_BUS_ADDRESS not set");
         connection = new DBusConnection(dBusSessionAddress);
     }
@@ -82,7 +81,7 @@ public class MediaManagerLinux : MediaManager
         {
             if (s.StartsWith(serviceNamePrefix))
             {
-                MediaSessionLinux session = new MediaSessionLinux(s, connection);
+                MediaSessionLinux session = new(s, connection);
                 await NameAcquiredHandlerAsync(session);
             }
         }
@@ -90,7 +89,7 @@ public class MediaManagerLinux : MediaManager
 
     private async Task NameOwnerChangedHandlerAsync(NameOwnerChangedSignature signature)
     {
-        MediaSessionLinux session = new MediaSessionLinux(signature.name, connection);
+        MediaSessionLinux session = new(signature.name, connection);
 
         if (string.IsNullOrEmpty(signature.oldOwner) && !string.IsNullOrEmpty(signature.newOwner)) {
             await NameAcquiredHandlerAsync(session);
@@ -226,7 +225,7 @@ public class MediaSessionLinux : MediaSession
                 return status;                
             }
         );
-        Console.WriteLine(status.ToSessionStatus());
+        
         return status.ToSessionStatus();
     }
 
@@ -283,3 +282,4 @@ public class MediaSessionLinux : MediaSession
         return writer.CreateMessage();
     }
 }
+#endif

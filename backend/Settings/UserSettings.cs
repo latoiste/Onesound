@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OneSound.Settings;
 
@@ -21,14 +22,14 @@ public class UserSettings
     {
         rootSettings.RegisteredAumids.Add(aumid);
 
-        File.WriteAllText(filePath, JsonSerializer.Serialize(rootSettings, options));
+        File.WriteAllText(filePath, JsonSerializer.Serialize(rootSettings, JsonContext.Default.RootSettings));
     }
 
     public void RemoveRegisteredAumid(string aumid)
     {
         rootSettings.RegisteredAumids.Remove(aumid);
         
-        File.WriteAllText(filePath, JsonSerializer.Serialize(rootSettings, options));
+        File.WriteAllText(filePath, JsonSerializer.Serialize(rootSettings, JsonContext.Default.RootSettings));
     }
 
     public List<string> ReadRegisteredAumid() => rootSettings.RegisteredAumids;
@@ -36,10 +37,13 @@ public class UserSettings
     private RootSettings GetDeserializedJson()
     {
         string jsonString = File.ReadAllText(filePath);
-        RootSettings? s = JsonSerializer.Deserialize<RootSettings>(jsonString);
+        RootSettings? s = JsonSerializer.Deserialize(jsonString, JsonContext.Default.RootSettings);
 
         if (s == null) throw new Exception($"Failed to parse {Path.GetFullPath(filePath)}");
 
         return s!;
     }
 }
+
+[JsonSerializable(typeof(RootSettings))]
+public partial class JsonContext : JsonSerializerContext { }

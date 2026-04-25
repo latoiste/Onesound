@@ -3,4 +3,4 @@ backend/obj
 
 frontend/bin
 
-build.ps1
+build.sh

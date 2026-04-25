@@ -1,3 +1,4 @@
+#if WINDOWS
 using OneSound.Media.Session;
 using Windows.Media.Control;
 
@@ -63,3 +64,4 @@ public class MediaSessionWindows : MediaSession
 
     public override async Task PlayAsync() => await controlSession.TryPlayAsync();
 }
+#endif
